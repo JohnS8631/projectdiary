@@ -6,8 +6,9 @@ session_start();
 if(array_key_exists('logout',$_GET))
 {
   unset($_SESSION);
-  setcookie("id","",time()-60*60*365);
+  setcookie("id","",time()-60*60*24*365);
   $_COOKIE['id']="";
+  session_destroy();
 }
 else if((array_key_exists("id", $_SESSION) AND $_SESSION['id']) OR (array_key_exists("id", $_COOKIE) AND $_COOKIE['id']))
 {
@@ -81,20 +82,24 @@ if(array_key_exists('submit',$_POST))
         $_SESSION['id']=mysqli_insert_id($link);
         if($_POST['keeploggedin']=='1')
         {
-          setcookie("id",mysqli_insert_id($link),time()+60*60*365);
+          setcookie("id",mysqli_insert_id($link),time()+60*60*24*365);
         }
            header("Location:loggedinpage.php");
       }
     }
    }
     else
-     {
-     $query="SELECT password FROM PROJECTDIARY WHERE email='".mysqli_real_escape_string($link,$_POST['emailad'])."'";
+    {
+     $query="SELECT * FROM PROJECTDIARY WHERE email='".mysqli_real_escape_string($link,$_POST['emailad'])."'";
        $result=mysqli_query($link,$query);
        $row=mysqli_fetch_array($result);
          if(password_verify($_POST['passwd'],$row['password']))
          {
           header("Location:loggedinpage.php");
+        $query1="SELECT * FROM PROJECTDIARY WHERE email='".mysqli_real_escape_string($link,$_POST['emailad'])."'";
+        $myresult=mysqli_query($link,$query1);
+        $myrow=mysqli_fetch_array($myresult);
+        $_SESSION['emailad']=$myrow['email'];
          }
         else
          {
@@ -111,6 +116,7 @@ if(array_key_exists('submit',$_POST))
     $success='<div class="alert alert-success">'."<p>Congrats:</p>".$success.'</div>';
   }
 }
+
 ?>
  <!doctype html>
 <html lang="en">
@@ -133,7 +139,9 @@ style="border:0px;" alt="Web-Stat traffic analytics"></a></noscript>
 
 <!-- Latest compiled JavaScript -->
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
     <div class="container"  id="signupform">
+      
       <form method="post">
         <h1 id="fy">Secret Diary</h1>
         <h2 id="hu">Store your thoughts permanently and securely.</h2>
@@ -141,7 +149,7 @@ style="border:0px;" alt="Web-Stat traffic analytics"></a></noscript>
         <div id="missing"><?php echo $missing ?></div>
         <div id="error"><?php echo $error ?></div>
        <div id="success"><?php echo $success ?></div>
-        <div class="rty" id="signupform">
+        <div class="rty">
          <input type="email" id="emailad" name="emailad"  placeholder="Your Email">
         </div>
         <div class="wer">
@@ -149,7 +157,7 @@ style="border:0px;" alt="Web-Stat traffic analytics"></a></noscript>
         </div>
         <input type="hidden" name="signup" value="1">
         <input type="checkbox" id="keeploggedin" name="keeploggedin" value=1><p id="loggtext"> Keep me logged in</p>
-        <button class="btn btn-primary" type="submit" id="lo" name="submit" value="signup">SUBMIT</button>
+        <button class="btn btn-primary" type="submit" id="lo" name="submit" value="signup">SIGNUP</button>
       </form>
     </div>
     <div class="container" id="loginform">
@@ -164,17 +172,13 @@ style="border:0px;" alt="Web-Stat traffic analytics"></a></noscript>
         <input type="hidden" name="signup" value="0">
         <input type="checkbox" id="keeploggedin" name="keeploggedin" value=1><p id="loggtext"> Keep me logged in</p>
         <button class="btn btn-success" type="submit" id="lo" name="submit" value="signup">LOGIN</button>
+      <p name="forgot" id="fpassw"><a href="forgot_password.php">CHANGE PASSWORD</a></p>
     </form>
     </div>
-    <script type="text/javascript">
-      $(".toggleforms").click(function()
-                                {
-       $("#signupform").toggle("fast",function()
-                               {
-         $("#loginform").show();
-       $("#signinform").hide();
-      });
-      });
-    </script>
+   <?php include("footer.php");
+          ?>
+    <center>
+       <b id="mkl"><center>&copy;2018,NIKHIL KUMAR WORKS</center></b>
+          </center>
   </body>
 </html>
